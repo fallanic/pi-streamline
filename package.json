@@ -4,14 +4,24 @@
 	"description": "Opencode-style compact tool and subagent rendering for Pi.",
 	"type": "module",
 	"license": "MIT",
-	"keywords": ["pi-package", "pi-extension", "tui"],
+	"keywords": [
+		"pi-package",
+		"pi-extension",
+		"tui"
+	],
 	"pi": {
-		"extensions": ["./extensions/opencode-ui/index.ts"]
+		"extensions": [
+			"./extensions/opencode-ui/index.ts"
+		]
 	},
 	"peerDependencies": {
 		"@earendil-works/pi-coding-agent": ">=0.87.1"
 	},
 	"scripts": {
 		"test": "node --test test/"
+	},
+	"devDependencies": {
+		"@earendil-works/pi-coding-agent": "^0.87.1",
+		"@earendil-works/pi-tui": "^0.87.1"
 	}
 }
