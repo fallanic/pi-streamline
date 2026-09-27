@@ -166,3 +166,12 @@ Details and gotchas, all verified by running them:
 - Changing the editor, footer, themes, or any tool's execution.
 - Rendering tool output for tools that already ship their own `renderResult` (`subagent` included).
 - Reimplementing zentui. Borrow its patch/restore idea (~30 lines), not its 210-line patch registry — one patch, one stored predecessor, one owner.
+
+## 8. Progress
+
+- [x] **M1** live status line (`extensions/opencode-ui/status-line.ts`, wired in `index.ts`) — `npm test` (17 checks) + load verified in pi.
+- [ ] M2 `getRenderShell` -> `"self"` with detect-and-no-op
+- [ ] M3 compact rows for the 8 built-ins
+- [ ] M4 expand delegates to the predecessor renderer
+- [ ] M5 subagent hint + `/opencode-ui` command + config
+- [ ] M6 package/publish

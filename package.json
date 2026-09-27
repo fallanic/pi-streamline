@@ -1,0 +1,17 @@
+{
+	"name": "pi-opencode-ui",
+	"version": "0.0.0",
+	"description": "Opencode-style compact tool and subagent rendering for Pi.",
+	"type": "module",
+	"license": "MIT",
+	"keywords": ["pi-package", "pi-extension", "tui"],
+	"pi": {
+		"extensions": ["./extensions/opencode-ui/index.ts"]
+	},
+	"peerDependencies": {
+		"@earendil-works/pi-coding-agent": ">=0.87.1"
+	},
+	"scripts": {
+		"test": "node --test test/"
+	}
+}
