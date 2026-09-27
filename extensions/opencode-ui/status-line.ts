@@ -6,6 +6,9 @@ export type ToolCall = {
 	startedAt: number;
 };
 
+/** Trailing hint per tool, e.g. where to watch a subagent run. */
+const HINTS: Record<string, string> = { subagent: "↳ /subagents-fleet" };
+
 /** Enough for a long session; older rows lose their metric rather than memory. */
 export const MAX_TRACKED_DURATIONS = 256;
 
@@ -19,6 +22,8 @@ export class StatusLine {
 	readonly #calls = new Map<string, ToolCall>();
 	/** Settled durations, so a transcript row can show a metric after the run ended. */
 	readonly #durations = new Map<string, number>();
+	/** Whether per-tool hints are appended to the line. */
+	hints = true;
 
 	start(toolCallId: string, toolName: string, args: unknown, now = Date.now()): void {
 		this.#calls.set(toolCallId, { toolName, args, startedAt: now });
@@ -60,6 +65,10 @@ export class StatusLine {
 		const current = Array.from(this.#calls.values()).at(-1) as ToolCall;
 		const detail = summarize(current.toolName, current.args);
 		const line = detail ? `${toolLabel(current.toolName)}  ${detail}` : toolLabel(current.toolName);
-		return this.#calls.size > 1 ? `${line} +${this.#calls.size - 1} more` : line;
+		const hint = this.hints ? HINTS[current.toolName] : undefined;
+		return [
+			this.#calls.size > 1 ? `${line} +${this.#calls.size - 1} more` : line,
+			...(hint ? [hint] : []),
+		].join("  ");
 	}
 }

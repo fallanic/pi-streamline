@@ -105,14 +105,18 @@ If a *better* dive-in is wanted later (open the child session in a `ctx.ui.custo
 
 ### Layer 4 — configuration
 
-`getAgentDir() + "/opencode-ui.json"` plus a `/opencode-ui` command using `ctx.ui.select()`:
+`getAgentDir() + "/opencode-ui.json"` plus a `/opencode-ui` command that reopens a
+`ctx.ui.select()` menu until Done or cancel (`settings-command.ts`):
 
 - `statusLine: boolean` (default true)
 - `compactTools: boolean` (default true)
-- `maxOutputLines: number` (default 0 = hidden while collapsed, mirroring opencode)
 - `subagentHint: boolean` (default true)
+- `outputPreviewLines: number` (cycles 0 / 3 / 8, default 0 = hidden while collapsed)
 
-Every option is read at render time so a change takes effect on `/reload` with no restart.
+The load path is tolerant: missing file, invalid JSON, or a wrong-typed value
+falls back per key, so a broken config can never break the TUI. Changes apply
+immediately (`compactTools` affects calls started after the toggle) and are
+written back to disk, with a notification if the write fails.
 
 ## 4. Milestones
 
@@ -173,5 +177,5 @@ Details and gotchas, all verified by running them:
 - [x] **M2** `getRenderShell` -> `"self"` with detect-and-no-op (`patch.ts`, `compact-shell.ts`) — 22 checks; verified the stock band disappears and restores cleanly
 - [x] **M3** one-line rows for the 8 built-ins (`compact-rows.ts`, `COMPACT_TOOLS` table)
 - [x] **M4** expanded rows delegate to Pi's own renderer — no output is ever lost
-- [ ] M5 subagent hint + `/opencode-ui` command + config
+- [x] **M5** `/opencode-ui` settings menu, `opencode-ui.json`, subagent hint, output preview
 - [ ] M6 package/publish

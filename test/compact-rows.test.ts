@@ -141,6 +141,21 @@ describe("compact tool rows", () => {
 		assert.ok(lines[0].includes("3 lines · 120ms"), lines[0]);
 	});
 
+	it("shows a peek at the output when configured", (t) => {
+		const uninstallShell = installCompactShell();
+		const uninstallRows = installCompactRows(log, undefined, () => ({ outputPreviewLines: 2 }));
+		assert.ok(uninstallShell && uninstallRows);
+		t.after(() => {
+			uninstallRows();
+			uninstallShell();
+		});
+		const lines = textLines("read", { path: "src/a.ts" });
+		assert.equal(lines.length, 3, "row plus two preview lines");
+		assert.ok(lines[0].startsWith("✓  Read  src/a.ts"));
+		assert.equal(lines[1], "BODY-LINE-1");
+		assert.equal(lines[2], "BODY-LINE-2");
+	});
+
 	it("leaves tools that own a renderer alone", (t) => {
 		install(t);
 		const joined = textLines("subagent", { agent: "reviewer" }).join("\n");

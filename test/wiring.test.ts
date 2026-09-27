@@ -8,17 +8,22 @@ type Handler = (event: unknown, ctx: unknown) => void;
 function harness(mode = "tui", hasUI = true) {
 	const handlers = new Map<string, Handler[]>();
 	const messages: (string | undefined)[] = [];
+	const commands = new Map<string, (args: string, ctx: unknown) => Promise<void>>();
 	const pi = {
 		on(event: string, handler: Handler) {
 			const list = handlers.get(event) ?? [];
 			list.push(handler);
 			handlers.set(event, list);
 		},
+		registerCommand(name: string, options: { handler: (args: string, ctx: unknown) => Promise<void> }) {
+			commands.set(name, options.handler);
+		},
 	};
 	opencodeUi(pi as never);
 	const ctx = { mode, hasUI, ui: { setWorkingMessage: (m?: string) => messages.push(m) } };
 	return {
 		messages,
+		commands,
 		emit(event: string, payload: unknown = {}) {
 			for (const handler of handlers.get(event) ?? []) handler(payload, ctx);
 		},
@@ -47,6 +52,11 @@ describe("extension wiring", () => {
 		ui.emit("tool_execution_start", { toolCallId: "a", toolName: "read", args: { file: "a.ts" } });
 		ui.emit("session_shutdown");
 		assert.deepEqual(ui.messages, ["Read  a.ts", undefined]);
+	});
+
+	it("registers the settings command", () => {
+		const ui = harness();
+		assert.deepEqual([...ui.commands.keys()], ["opencode-ui"]);
 	});
 
 	it("stays silent outside the interactive TUI", () => {

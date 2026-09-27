@@ -48,6 +48,14 @@ describe("StatusLine", () => {
 		assert.equal(status.text(), undefined);
 	});
 
+	it("points at the fleet view while a subagent runs", () => {
+		const status = new StatusLine();
+		status.start("a", "subagent", { agent: "reviewer" });
+		assert.equal(status.text(), "Subagent  reviewer  ↳ /subagents-fleet");
+		status.hints = false;
+		assert.equal(status.text(), "Subagent  reviewer");
+	});
+
 	it("shows only the label for a tool with no arguments", () => {
 		const status = new StatusLine();
 		status.start("a", "session_list", {});

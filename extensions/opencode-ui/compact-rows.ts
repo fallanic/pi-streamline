@@ -40,6 +40,13 @@ type ResultRenderer = (
 	context: RenderContext,
 ) => Component | undefined;
 
+export type RowOptions = {
+	/** Lines of output shown inside a collapsed row; 0 hides them. */
+	outputPreviewLines: number;
+};
+
+const NO_PREVIEW: RowOptions = { outputPreviewLines: 0 };
+
 export function formatDuration(ms: number): string {
 	if (ms < 1000) return `${ms}ms`;
 	if (ms < 60_000) return `${(ms / 1000).toFixed(1)}s`;
@@ -57,6 +64,15 @@ function outputLines(result: AgentToolResult | undefined): number {
 	return lines;
 }
 
+function previewLines(result: AgentToolResult | undefined, max: number): string[] {
+	if (max <= 0) return [];
+	const text = (result?.content ?? [])
+		.filter((block) => block?.type === "text" && typeof block.text === "string")
+		.map((block) => block.text as string)
+		.join("\n");
+	return text.split("\n").slice(0, max);
+}
+
 function metrics(result: AgentToolResult, log: StatusLine, context?: RenderContext): string {
 	const parts: string[] = [];
 	const lines = outputLines(result);
@@ -66,7 +82,7 @@ function metrics(result: AgentToolResult, log: StatusLine, context?: RenderConte
 	return parts.join(" · ");
 }
 
-/** `✓ Read  src/parser.ts  42 lines · 120ms` */
+/** `✓ Read  src/parser.ts  42 lines · 120ms`, optionally with a peek at the output. */
 function row(
 	theme: Theme,
 	icon: string,
@@ -74,11 +90,14 @@ function row(
 	toolName: string,
 	detail: string,
 	metricsText: string,
+	preview: string[] = [],
 ): Component {
 	const parts = [theme.fg("toolTitle", theme.bold(toolLabel(toolName)))];
 	if (detail) parts.push(theme.fg("text", detail));
 	if (metricsText) parts.push(theme.fg("muted", metricsText));
-	return new Text(`${theme.fg(iconColor, icon)}  ${parts.join("  ")}`, 0, 0);
+	const lines = [`${theme.fg(iconColor, icon)}  ${parts.join("  ")}`];
+	for (const line of preview) lines.push(theme.fg("dim", `   ${line}`));
+	return new Text(lines.join("\n"), 0, 0);
 }
 
 /**
@@ -93,6 +112,8 @@ function row(
 export function installCompactRows(
 	log: StatusLine,
 	target: object | undefined = ToolExecutionComponent.prototype,
+	// Named `rowOptions` on purpose: the result renderer receives its own `options`.
+	rowOptions: () => RowOptions = () => NO_PREVIEW,
 ): (() => void) | undefined {
 	// Each seam returns a *renderer*, so the patch builds one: the getter runs with
 	// no arguments, the renderer it hands back is what receives theme and context.
@@ -126,6 +147,7 @@ export function installCompactRows(
 					this.toolName,
 					toolDetail(this.toolName, this.args),
 					metrics(result, log, context),
+					previewLines(result, rowOptions().outputPreviewLines),
 				);
 			};
 		},
