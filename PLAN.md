@@ -178,4 +178,4 @@ Details and gotchas, all verified by running them:
 - [x] **M3** one-line rows for the 8 built-ins (`compact-rows.ts`, `COMPACT_TOOLS` table)
 - [x] **M4** expanded rows delegate to Pi's own renderer — no output is ever lost
 - [x] **M5** `/opencode-ui` settings menu, `opencode-ui.json`, subagent hint, output preview
-- [ ] M6 package/publish
+- [x] **M6** package manifest, peer range, README with install/uninstall (npm publish deferred)
