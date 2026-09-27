@@ -171,7 +171,7 @@ Details and gotchas, all verified by running them:
 
 - [x] **M1** live status line (`extensions/opencode-ui/status-line.ts`, wired in `index.ts`) — `npm test` (17 checks) + load verified in pi.
 - [x] **M2** `getRenderShell` -> `"self"` with detect-and-no-op (`patch.ts`, `compact-shell.ts`) — 22 checks; verified the stock band disappears and restores cleanly
-- [ ] M3 compact rows for the 8 built-ins
-- [ ] M4 expand delegates to the predecessor renderer
+- [x] **M3** one-line rows for the 8 built-ins (`compact-rows.ts`, `COMPACT_TOOLS` table)
+- [x] **M4** expanded rows delegate to Pi's own renderer — no output is ever lost
 - [ ] M5 subagent hint + `/opencode-ui` command + config
 - [ ] M6 package/publish

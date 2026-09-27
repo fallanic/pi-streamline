@@ -1,4 +1,5 @@
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
+import { installCompactRows } from "./compact-rows.ts";
 import { installCompactShell } from "./compact-shell.ts";
 import { StatusLine } from "./status-line.ts";
 
@@ -15,14 +16,16 @@ function interactive(ctx: ExtensionContext): boolean {
 export default function opencodeUi(pi: ExtensionAPI): void {
 	const status = new StatusLine();
 	let uninstallShell: (() => void) | undefined;
+	let uninstallRows: (() => void) | undefined;
 
 	// The shell decides the container in the ToolExecutionComponent constructor,
 	// so the patch has to be in place before the first tool call renders.
 	pi.on("session_start", (_event, ctx) => {
 		uninstallShell = installCompactShell();
-		if (!uninstallShell && interactive(ctx)) {
+		uninstallRows = installCompactRows(status);
+		if ((!uninstallShell || !uninstallRows) && interactive(ctx)) {
 			ctx.ui.notify(
-				"opencode-ui: Pi no longer exposes the tool render shell, running without compact rows",
+				"opencode-ui: Pi no longer exposes the tool renderers, running without compact rows",
 				"warning",
 			);
 		}
@@ -47,7 +50,9 @@ export default function opencodeUi(pi: ExtensionAPI): void {
 
 	pi.on("session_shutdown", (_event, ctx) => {
 		reset(_event, ctx);
+		uninstallRows?.();
 		uninstallShell?.();
+		uninstallRows = undefined;
 		uninstallShell = undefined;
 	});
 }

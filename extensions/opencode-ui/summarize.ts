@@ -40,3 +40,35 @@ export function summarize(toolName: string, args: unknown): string {
 export function toolLabel(toolName: string): string {
 	return toolName ? toolName[0].toUpperCase() + toolName.slice(1) : toolName;
 }
+
+/**
+ * The argument that identifies the work, per built-in tool.
+ *
+ * This map is also the opt-in list for compact rows: a tool missing from it keeps
+ * Pi's own renderer, which is how `subagent` and every other extension tool are
+ * left alone.
+ */
+const ARG_KEYS: Record<string, readonly string[]> = {
+	read: ["path"],
+	write: ["path"],
+	edit: ["path"],
+	bash: ["command"],
+	powershell: ["command"],
+	grep: ["pattern", "path"],
+	find: ["pattern", "path"],
+	ls: ["path"],
+};
+
+export const COMPACT_TOOLS: ReadonlySet<string> = new Set(Object.keys(ARG_KEYS));
+
+/** The tool's identifying argument, falling back to the generic heuristic. */
+export function toolDetail(toolName: string, args: unknown): string {
+	const keys = ARG_KEYS[toolName];
+	if (keys && args !== null && typeof args === "object") {
+		for (const key of keys) {
+			const value = (args as Record<string, unknown>)[key];
+			if (typeof value === "string" && value.trim()) return truncate(compact(value));
+		}
+	}
+	return summarize(toolName, args);
+}

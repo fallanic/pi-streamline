@@ -6,6 +6,9 @@ export type ToolCall = {
 	startedAt: number;
 };
 
+/** Enough for a long session; older rows lose their metric rather than memory. */
+export const MAX_TRACKED_DURATIONS = 256;
+
 /**
  * Tracks in-flight tool calls and renders the single live status line.
  *
@@ -14,6 +17,8 @@ export type ToolCall = {
  */
 export class StatusLine {
 	readonly #calls = new Map<string, ToolCall>();
+	/** Settled durations, so a transcript row can show a metric after the run ended. */
+	readonly #durations = new Map<string, number>();
 
 	start(toolCallId: string, toolName: string, args: unknown, now = Date.now()): void {
 		this.#calls.set(toolCallId, { toolName, args, startedAt: now });
@@ -24,7 +29,20 @@ export class StatusLine {
 		const call = this.#calls.get(toolCallId);
 		if (!call) return undefined;
 		this.#calls.delete(toolCallId);
-		return Math.max(0, now - call.startedAt);
+		const duration = Math.max(0, now - call.startedAt);
+		this.#durations.set(toolCallId, duration);
+		// Transcript rows re-render long after the run, so durations outlive #calls.
+		// Bounded so a long session cannot grow this without limit.
+		if (this.#durations.size > MAX_TRACKED_DURATIONS) {
+			const oldest = this.#durations.keys().next().value;
+			if (oldest !== undefined) this.#durations.delete(oldest);
+		}
+		return duration;
+	}
+
+	/** Duration of a settled call, or undefined while it runs or if it was evicted. */
+	durationOf(toolCallId: string): number | undefined {
+		return this.#durations.get(toolCallId);
 	}
 
 	clear(): void {
