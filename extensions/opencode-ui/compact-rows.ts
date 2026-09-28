@@ -106,12 +106,14 @@ function row(
 	detail: string,
 	metricsText: string,
 	preview: string[] = [],
+	hint?: string,
 ): Component {
 	const parts = [theme.fg("toolTitle", theme.bold(toolLabel(toolName)))];
 	if (detail) parts.push(theme.fg("text", detail));
 	if (metricsText) parts.push(theme.fg("muted", metricsText));
 	const lines = [`${theme.fg(iconColor, icon)}  ${parts.join("  ")}`];
 	for (const line of preview) lines.push(theme.fg("dim", `   ${line}`));
+	if (hint) lines.push(theme.fg("dim", `   ${hint}`));
 	return new Text(lines.join("\n"), 0, 0);
 }
 
@@ -216,6 +218,9 @@ export function installCompactRows(
 						theme.bg(isError ? "toolErrorBg" : "toolSuccessBg", text),
 					);
 					band.addChild(inner);
+					// Add collapse hint below the expanded content
+					const collapseHint = new Text(theme.fg("dim", `   Click to collapse`), 0, 0);
+					band.addChild(collapseHint);
 					return clickable(component, band);
 				}
 				// Collapsed rows never reach Pi's renderer, so it has nothing to reuse.
@@ -230,6 +235,7 @@ export function installCompactRows(
 						toolDetail(this.toolName, this.args),
 						metrics(result, log, context),
 						previewLines(result, rowOptions().outputPreviewLines),
+						"Click to expand",
 					),
 				);
 			};
