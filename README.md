@@ -65,10 +65,10 @@ resolve from the settings file that declares them — so remove it from the proj
 
 | Setting | Default | Effect |
 | --- | --- | --- |
-| `statusLine` | `on` | Drive Pi's working message with the current tool |
-| `compactTools` | `on` | One-line tool rows. This is the kill switch for the invasive part |
-| `subagentHint` | `on` | Append `↳ /subagents-fleet` while a subagent runs |
-| `outputPreviewLines` | `0` | Lines of output inside a collapsed row: hidden, 3 or 8 |
+| `compactTools` | `on` | One-line tool rows. Turn off to restore Pi's default tool view. |
+| `outputPreviewLines` | `0` | Lines of output inside a collapsed row: 0 (hidden), 3, or 8 |
+| `statusLine` | `on` | Replace Pi's default "Working..." message with explicit tool states (running/done/failed + duration) |
+| `subagentHint` | `on` | Append `↳ /subagents-fleet` while a `pi-subagents` subagent runs (only works with `pi-subagents`) |
 
 Subagent rows are rendered by `pi-subagents` itself, which this extension deliberately leaves
 alone. To get the opencode two-line live form there, set in your `pi-subagents` config:

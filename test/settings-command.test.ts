@@ -22,10 +22,10 @@ function scriptedSelect(answers: (string | undefined)[]) {
 describe("settings menu", () => {
 	it("lists every setting plus Done", () => {
 		assert.deepEqual(menuEntries(DEFAULT_SETTINGS), [
-			"statusLine: on",
 			"compactTools: on",
-			"subagentHint: on",
 			"outputPreview: hidden",
+			"statusLine: on",
+			"subagentHint: on",
 			"Done",
 		]);
 	});

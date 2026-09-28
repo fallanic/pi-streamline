@@ -13,15 +13,15 @@ function previewLabel(lines: number): string {
 /** Menu row per setting, in the order the menu shows them. */
 export function menuEntries(settings: Settings): string[] {
 	return [
-		`statusLine: ${on(settings.statusLine)}`,
 		`compactTools: ${on(settings.compactTools)}`,
-		`subagentHint: ${on(settings.subagentHint)}`,
 		`outputPreview: ${previewLabel(settings.outputPreviewLines)}`,
+		`statusLine: ${on(settings.statusLine)}`,
+		`subagentHint: ${on(settings.subagentHint)}`,
 		"Done",
 	];
 }
 
-const TOGGLES = ["statusLine", "compactTools", "subagentHint"] as const;
+const TOGGLES = ["compactTools", "statusLine", "subagentHint"] as const;
 
 /**
  * Toggles settings in place until the user picks Done or cancels.
@@ -41,7 +41,7 @@ export async function openSettings(
 		const picked = entries.indexOf(choice);
 		if (picked < 0 || picked === entries.length - 1) return; // unknown or Done
 
-		if (picked === 3) {
+		if (picked === 1) {
 			const at = PREVIEW_CHOICES.indexOf(
 				settings.outputPreviewLines as (typeof PREVIEW_CHOICES)[number],
 			);
@@ -50,7 +50,7 @@ export async function openSettings(
 			continue;
 		}
 
-		const changed = TOGGLES[picked];
+		const changed = TOGGLES[picked < 1 ? picked : picked - 1];
 		if (!changed) return;
 		settings[changed] = !settings[changed];
 		apply(changed);
