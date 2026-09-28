@@ -179,3 +179,11 @@ Details and gotchas, all verified by running them:
 - [x] **M4** expanded rows delegate to Pi's own renderer — no output is ever lost
 - [x] **M5** `/opencode-ui` settings menu, `opencode-ui.json`, subagent hint, output preview
 - [x] **M6** package manifest, peer range, README with install/uninstall (npm publish deferred)
+- [x] **M7** click owns the toggle, expanded rows get Pi's `toolSuccessBg`/`toolErrorBg` band, and a click low in the viewport scrolls the row's first line to the top (`revealRow` writes `currentScrollTop`/`followingEnd` because `scrollTo` clamps against the pre-expansion content and the next `updateLayout` re-anchors) — 54 checks
+
+## 9. Open questions
+
+- Click-to-expand needs Pi's fullscreen TUI mode: `settings.tuiMode` defaults to unset, which
+  `getTuiMode()` reads as `regular`, and `TuiMainScreen` never writes `?1000h` and has no
+  `handleMouseEvent`. Worth an upstream issue: the README says click a row, but the default
+  configuration can never deliver the click.

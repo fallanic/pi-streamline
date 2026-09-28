@@ -169,6 +169,42 @@ describe("compact tool rows", () => {
 		);
 	});
 
+	it("expands on click, the way the README says", (t) => {		install(t);
+		const component = new ToolExecutionComponent(
+			"read",
+			"call-1",
+			{ file_path: "a.ts" },
+			{},
+			{ renderCall: () => new Text("CALL", 0, 0), renderResult: () => new Text(BODY, 0, 0) },
+			fakeUi,
+			CWD,
+		);
+		component.markExecutionStarted();
+		component.setArgsComplete();
+		component.updateResult({ content: [{ type: "text", text: BODY }], isError: false }, false);
+
+		// The TUI renders a leading blank line, so the row is at y=1.
+		const height = component.render(60).length;
+		const click = (y: number) =>
+			component.handleMouse({ type: "click", button: "left", x: 2, y, width: 60, height });
+		assert.equal(click(0), undefined, "the blank spacer line is not a row");
+		assert.equal(component.expanded, false);
+		assert.ok(click(1)?.handled, "the row handles the click");
+		assert.equal(component.expanded, true);
+		assert.match(component.render(60)[1].replace(/\[[0-9;]*m/g, ""), /BODY-LINE-1/);
+	});
+
+	it("bands the expanded output with Pi's own tool background", (t) => {
+		install(t);
+		// Raw lines: textLines() strips the very escapes this asserts on.
+		const hasBackground = (text: string) => /\u001b\[4[89];/.test(text);
+		const collapsed = render("bash", { command: "ls" }).join("\n");
+		const expanded = render("bash", { command: "ls" }, { expanded: true }).join("\n");
+		assert.equal(hasBackground(collapsed), false, "a collapsed row has no band");
+		assert.ok(hasBackground(expanded), `expanded output is banded, got ${JSON.stringify(expanded)}`);
+		assert.ok(expanded.includes("BODY-LINE-1"), "the band wraps the predecessor's output");
+	});
+
 	it("no-ops when a seam is missing", () => {
 		assert.equal(installCompactRows(log, {}), undefined);
 		assert.equal(installCompactRows(log, { getCallRenderer: () => undefined }), undefined);

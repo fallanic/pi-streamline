@@ -9,8 +9,12 @@ status line while work runs, and one line per tool call in the transcript.
 ✗ Grep  TODO  3 lines
 ```
 
-Nothing is hidden permanently — click a row (or press Pi's expand key) for the full output,
-exactly as Pi renders it today. Tool execution, results, and the session file are untouched.
+Nothing is hidden permanently — press Pi's expand key (`ctrl+o`) or click a row for the full
+output, exactly as Pi renders it today. An expanded row gets Pi's own tool background so it reads
+as an open block, and clicking a row low in the viewport scrolls it to the top, since the
+transcript is bottom-anchored. Clicking needs Pi's fullscreen TUI mode (`/config` → TUI mode →
+`fullscreen`); Pi's regular mode never asks the terminal for mouse input. Tool execution, results,
+and the session file are untouched.
 
 ## Requirements
 

@@ -1,6 +1,6 @@
 import { ToolExecutionComponent } from "@earendil-works/pi-coding-agent";
 import type { Component, Theme } from "@earendil-works/pi-tui";
-import { Text } from "@earendil-works/pi-tui";
+import { Box, MouseRegion, Text } from "@earendil-works/pi-tui";
 import { type AnyMethod, patchMethod } from "./patch.ts";
 import type { StatusLine } from "./status-line.ts";
 import { COMPACT_TOOLS, toolDetail, toolLabel } from "./summarize.ts";
@@ -22,6 +22,21 @@ const BLANK: Component = {
 type ToolExecution = {
 	toolName: string;
 	args: unknown;
+	expanded: boolean;
+	setExpanded(expanded: boolean): void;
+	ui: {
+		getPrimaryScrollView?(): ScrollTarget;
+		requestRender?(): void;
+	};
+};
+
+type MouseEvent = { type: string; button: string; screenY: number };
+
+/** The two ScrollView fields the scroll below depends on. */
+type ScrollTarget = {
+	currentScrollTop: number;
+	currentViewportHeight: number;
+	followingEnd: boolean;
 };
 
 type RenderContext = { isError?: boolean; toolCallId?: string; isPartial?: boolean };
@@ -101,6 +116,52 @@ function row(
 }
 
 /**
+ * Click toggles the row, and pulls it up when the expansion would push its output
+ * below the fold.
+ *
+ * The transcript is bottom-anchored, so expanding the last rows hides their
+ * beginnings under the top of the viewport. Scrolling the clicked line to the top
+ * is what puts the whole block back in view. A click near the top already shows
+ * everything, so it is left alone.
+ */
+function clickable(component: ToolExecution, body: Component): Component {
+	return new MouseRegion(body, (event: MouseEvent) => {
+		if (event.type !== "click" || event.button !== "left") return undefined;
+		component.setExpanded(!component.expanded);
+		const ui = component.ui;
+		const scroll = ui?.getPrimaryScrollView?.();
+		// `screenY` counts rows within the viewport, `currentScrollTop` within the
+		// content. The row's own first line is the blank one above the clicked line.
+		const offset = event.screenY;
+		if (scroll && offset >= scroll.currentViewportHeight / 3) {
+			revealRow(scroll, scroll.currentScrollTop + offset - 1);
+			ui.requestRender?.();
+		}
+		return { handled: true };
+	});
+}
+
+/**
+ * Moves the transcript so `target` is its first visible line.
+ *
+ * Not `scrollTo`: the transcript is bottom-anchored, so the expansion has not been
+ * laid out yet and `scrollTo` clamps against the old, shorter content — and the
+ * next `updateLayout` re-anchors to the end anyway, discarding the request. Writing
+ * the position directly survives it, because `updateLayout` keeps a non-following
+ * `currentScrollTop` and only clamps it into the new range.
+ *
+ * ponytail: writes two private fields. If Pi renames them the numeric check fails
+ * and expanding simply stops scrolling; upstream scroll API when one exists.
+ */
+function revealRow(scroll: ScrollTarget, target: number): void {
+	if (typeof scroll.currentScrollTop !== "number" || typeof scroll.followingEnd !== "boolean") {
+		return;
+	}
+	scroll.followingEnd = false;
+	scroll.currentScrollTop = Math.max(0, target);
+}
+
+/**
  * Replaces Pi's per-tool renderers with a single line.
  *
  * Only the tools in `COMPACT_TOOLS` are touched. Everything else — `subagent`
@@ -136,18 +197,31 @@ export function installCompactRows(
 		function (this: ToolExecution): ResultRenderer | undefined {
 			const predecessor = original.call(this) as ResultRenderer | undefined;
 			if (!COMPACT_TOOLS.has(this.toolName)) return predecessor;
+			const component = this;
 			return (result, options, theme, context) => {
-				// Expanded: Pi's own renderer, full output.
-				if (options?.expanded) return predecessor?.(result, options, theme, context);
 				const isError = context?.isError === true;
-				return row(
-					theme,
-					isError ? ICON_ERROR : ICON_OK,
-					isError ? "error" : "success",
-					this.toolName,
-					toolDetail(this.toolName, this.args),
-					metrics(result, log, context),
-					previewLines(result, rowOptions().outputPreviewLines),
+				// Expanded: Pi's own renderer, full output, on the background band Pi
+				// paints by default, so an open row is visible as a block.
+				if (options?.expanded) {
+					const expanded = predecessor?.(result, options, theme, context);
+					if (!expanded) return expanded;
+					const band = new Box(0, 0, (text) =>
+						theme.bg(isError ? "toolErrorBg" : "toolSuccessBg", text),
+					);
+					band.addChild(expanded);
+					return clickable(component, band);
+				}
+				return clickable(
+					component,
+					row(
+						theme,
+						isError ? ICON_ERROR : ICON_OK,
+						isError ? "error" : "success",
+						this.toolName,
+						toolDetail(this.toolName, this.args),
+						metrics(result, log, context),
+						previewLines(result, rowOptions().outputPreviewLines),
+					),
 				);
 			};
 		},
