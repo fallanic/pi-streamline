@@ -39,7 +39,7 @@ type ScrollTarget = {
 	followingEnd: boolean;
 };
 
-type RenderContext = { isError?: boolean; toolCallId?: string; isPartial?: boolean };
+type RenderContext = { isError?: boolean; toolCallId?: string; isPartial?: boolean; lastComponent?: Component };
 type ResultOptions = { expanded?: boolean };
 type AgentToolResult = { content?: Array<{ type?: string; text?: string }> };
 
@@ -198,19 +198,28 @@ export function installCompactRows(
 			const predecessor = original.call(this) as ResultRenderer | undefined;
 			if (!COMPACT_TOOLS.has(this.toolName)) return predecessor;
 			const component = this;
+			// Pi's renderers mutate and reuse `context.lastComponent` (`?? new Text()`
+			// then `setText`/`clear`). Pi stores whatever we return, so handing it our
+			// wrapper back would make them throw and Pi would silently fall back to a
+			// plain text dump. Track their component and pass that instead.
+			let inner: Component | undefined;
 			return (result, options, theme, context) => {
 				const isError = context?.isError === true;
 				// Expanded: Pi's own renderer, full output, on the background band Pi
 				// paints by default, so an open row is visible as a block.
 				if (options?.expanded) {
-					const expanded = predecessor?.(result, options, theme, context);
-					if (!expanded) return expanded;
+					// Always override: Pi's stored `lastComponent` is our wrapper.
+					const forwarded = { ...context, lastComponent: inner };
+					inner = predecessor?.(result, options, theme, forwarded);
+					if (!inner) return inner;
 					const band = new Box(0, 0, (text) =>
 						theme.bg(isError ? "toolErrorBg" : "toolSuccessBg", text),
 					);
-					band.addChild(expanded);
+					band.addChild(inner);
 					return clickable(component, band);
 				}
+				// Collapsed rows never reach Pi's renderer, so it has nothing to reuse.
+				inner = undefined;
 				return clickable(
 					component,
 					row(

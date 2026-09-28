@@ -26,6 +26,28 @@ function install(t: { after: (fn: () => void) => void }) {
 	});
 }
 
+/**
+ * Pi's own idiom: reuse and mutate the previous component. Every built-in renderer
+ * does this, so a wrapper handed back as `lastComponent` makes them throw.
+ */
+const piStyleRenderers = {
+	renderCall: (_args: unknown, _theme: unknown, context: { lastComponent?: unknown }) => {
+		const text = (context.lastComponent as Text | undefined) ?? new Text("", 0, 0);
+		text.setText("CALL");
+		return text;
+	},
+	renderResult: (
+		_result: unknown,
+		_options: { expanded?: boolean },
+		_theme: unknown,
+		context: { lastComponent?: unknown },
+	) => {
+		const text = (context.lastComponent as Text | undefined) ?? new Text("", 0, 0);
+		text.setText(BODY);
+		return text;
+	},
+};
+
 /** Renders a finished tool call the way the transcript renders it. */
 function render(toolName: string, args: unknown, options: { expanded?: boolean } = {}) {
 	const component = new ToolExecutionComponent(
@@ -192,6 +214,41 @@ describe("compact tool rows", () => {
 		assert.ok(click(1)?.handled, "the row handles the click");
 		assert.equal(component.expanded, true);
 		assert.match(component.render(60)[1].replace(/\[[0-9;]*m/g, ""), /BODY-LINE-1/);
+	});
+
+	it("hands Pi's renderer back its own component, not our wrapper", (t) => {
+		install(t);
+		// The real renderers mutate `context.lastComponent`; if we pass our wrapper
+		// back, they throw and Pi silently falls back to a plain text dump.
+		const component = new ToolExecutionComponent(
+			"read",
+			"call-1",
+			{ file_path: "a.ts" },
+			{},
+			piStyleRenderers as never,
+			fakeUi,
+			CWD,
+		);
+		component.markExecutionStarted();
+		component.setArgsComplete();
+		component.updateResult({ content: [{ type: "text", text: BODY }], isError: false }, false);
+
+		component.setExpanded(true);
+		const expanded = component.render(60);
+		assert.ok(
+			expanded.join("\n").includes("BODY-LINE-2"),
+			"Pi's renderer produced the output instead of throwing into the fallback",
+		);
+		// Repaint while expanded: the renderer has to be able to reuse its component.
+		component.updateResult({ content: [{ type: "text", text: BODY }], isError: false }, false);
+		assert.ok(component.render(60).join("\n").includes("BODY-LINE-2"), "reused on repaint");
+
+		component.setExpanded(false);
+		component.setExpanded(true);
+		assert.ok(
+			component.render(60).join("\n").includes("BODY-LINE-2"),
+			"expanding again after a collapse still renders",
+		);
 	});
 
 	it("bands the expanded output with Pi's own tool background", (t) => {
