@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { MAX_SUMMARY_CHARS, summarize, toolLabel } from "../extensions/opencode-ui/summarize.ts";
+import { MAX_SUMMARY_CHARS, summarize, toolLabel } from "../extensions/streamline/summarize.ts";
 
 describe("summarize", () => {
 	it("uses the first string argument", () => {

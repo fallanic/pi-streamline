@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { initTheme, ToolExecutionComponent } from "@earendil-works/pi-coding-agent";
 import { Text } from "@earendil-works/pi-tui";
-import { installCompactShell } from "../extensions/opencode-ui/compact-shell.ts";
+import { installCompactShell } from "../extensions/streamline/compact-shell.ts";
 
 initTheme();
 

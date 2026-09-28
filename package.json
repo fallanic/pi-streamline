@@ -11,7 +11,7 @@
 	],
 	"pi": {
 		"extensions": [
-			"./extensions/opencode-ui/index.ts"
+			"./extensions/streamline/index.ts"
 		]
 	},
 	"peerDependencies": {

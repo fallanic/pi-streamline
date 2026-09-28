@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import opencodeUi from "../extensions/opencode-ui/index.ts";
+import opencodeUi from "../extensions/streamline/index.ts";
 
 type Handler = (event: unknown, ctx: unknown) => void;
 
@@ -56,7 +56,7 @@ describe("extension wiring", () => {
 
 	it("registers the settings command", () => {
 		const ui = harness();
-		assert.deepEqual([...ui.commands.keys()], ["opencode-ui"]);
+		assert.deepEqual([...ui.commands.keys()], ["streamline"]);
 	});
 
 	it("stays silent outside the interactive TUI", () => {

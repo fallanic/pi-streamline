@@ -41,7 +41,7 @@ pi install . -l -a
 Try it for a single run without touching any settings:
 
 ```bash
-pi -ne -e ./extensions/opencode-ui/index.ts
+pi -ne -e ./extensions/streamline/index.ts
 ```
 
 ## Uninstall

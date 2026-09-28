@@ -15,7 +15,7 @@ function interactive(ctx: ExtensionContext): boolean {
 	return ctx.mode === "tui" && ctx.hasUI;
 }
 
-export default function opencodeUi(pi: ExtensionAPI): void {
+export default function streamline(pi: ExtensionAPI): void {
 	const status = new StatusLine();
 	const settings: Settings = loadSettings();
 	let uninstall: (() => void) | undefined;
@@ -32,7 +32,7 @@ export default function opencodeUi(pi: ExtensionAPI): void {
 			uninstallRows?.();
 			if (interactive(ctx)) {
 				ctx.ui.notify(
-					"opencode-ui: Pi no longer exposes the tool renderers, running without compact rows",
+					"streamline: Pi no longer exposes the tool renderers, running without compact rows",
 					"warning",
 				);
 			}
@@ -76,8 +76,8 @@ export default function opencodeUi(pi: ExtensionAPI): void {
 		removePatches();
 	});
 
-	pi.registerCommand("opencode-ui", {
-		description: "Configure opencode-ui rendering",
+	pi.registerCommand("streamline", {
+		description: "Configure streamline rendering",
 		handler: async (_args, ctx) => {
 			await openSettings(ctx, settings, (changed) => {
 				if (changed === "statusLine" && !settings.statusLine) show(ctx, undefined);
@@ -90,7 +90,7 @@ export default function opencodeUi(pi: ExtensionAPI): void {
 					saveSettings(settings);
 				} catch (error) {
 					ctx.ui.notify(
-						`opencode-ui: could not save settings (${error instanceof Error ? error.message : String(error)})`,
+						`streamline: could not save settings (${error instanceof Error ? error.message : String(error)})`,
 						"warning",
 					);
 				}

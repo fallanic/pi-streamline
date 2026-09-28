@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { DEFAULT_SETTINGS, type Settings } from "../extensions/opencode-ui/config.ts";
-import { menuEntries, openSettings } from "../extensions/opencode-ui/settings-command.ts";
+import { DEFAULT_SETTINGS, type Settings } from "../extensions/streamline/config.ts";
+import { menuEntries, openSettings } from "../extensions/streamline/settings-command.ts";
 
 /** Answers the menu with a fixed script; `undefined` models a cancelled dialog. */
 function scriptedSelect(answers: (string | undefined)[]) {

@@ -3,10 +3,10 @@ import { mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, it } from "node:test";
-import { DEFAULT_SETTINGS, loadSettings, saveSettings } from "../extensions/opencode-ui/config.ts";
+import { DEFAULT_SETTINGS, loadSettings, saveSettings } from "../extensions/streamline/config.ts";
 
 function tempFile(contents?: string): string {
-	const path = join(mkdtempSync(join(tmpdir(), "opencode-ui-")), "opencode-ui.json");
+	const path = join(mkdtempSync(join(tmpdir(), "streamline-")), "streamline.json");
 	if (contents !== undefined) writeFileSync(path, contents, "utf8");
 	return path;
 }

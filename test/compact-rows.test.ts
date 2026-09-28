@@ -2,10 +2,10 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { initTheme, ToolExecutionComponent } from "@earendil-works/pi-coding-agent";
 import { Text } from "@earendil-works/pi-tui";
-import { installCompactShell } from "../extensions/opencode-ui/compact-shell.ts";
-import { formatDuration, installCompactRows } from "../extensions/opencode-ui/compact-rows.ts";
-import { StatusLine } from "../extensions/opencode-ui/status-line.ts";
-import { COMPACT_TOOLS } from "../extensions/opencode-ui/summarize.ts";
+import { installCompactShell } from "../extensions/streamline/compact-shell.ts";
+import { formatDuration, installCompactRows } from "../extensions/streamline/compact-rows.ts";
+import { StatusLine } from "../extensions/streamline/status-line.ts";
+import { COMPACT_TOOLS } from "../extensions/streamline/summarize.ts";
 
 initTheme();
 

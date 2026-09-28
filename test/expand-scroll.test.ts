@@ -4,9 +4,9 @@ import { initTheme, ToolExecutionComponent } from "@earendil-works/pi-coding-age
 import { Container, ScrollView, Text, VStack } from "@earendil-works/pi-tui";
 import { TuiAltScreen } from "@earendil-works/pi-tui/dist/tui-alt-screen.js";
 import { renderLayoutFrame } from "@earendil-works/pi-tui/dist/layout.js";
-import { installCompactShell } from "../extensions/opencode-ui/compact-shell.ts";
-import { installCompactRows } from "../extensions/opencode-ui/compact-rows.ts";
-import { StatusLine } from "../extensions/opencode-ui/status-line.ts";
+import { installCompactShell } from "../extensions/streamline/compact-shell.ts";
+import { installCompactRows } from "../extensions/streamline/compact-rows.ts";
+import { StatusLine } from "../extensions/streamline/status-line.ts";
 
 initTheme();
 

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { StatusLine } from "../extensions/opencode-ui/status-line.ts";
+import { StatusLine } from "../extensions/streamline/status-line.ts";
 
 describe("StatusLine", () => {
 	it("is empty until a call starts", () => {
