@@ -1,5 +1,5 @@
 {
-	"name": "pi-opencode-ui",
+	"name": "pi-streamline",
 	"version": "0.0.0",
 	"description": "Opencode-style compact tool and subagent rendering for Pi.",
 	"type": "module",

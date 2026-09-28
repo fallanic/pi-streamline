@@ -1,6 +1,6 @@
-# pi-opencode-ui
+# pi-streamline
 
-Opencode-style tool rendering for [Pi](https://github.com/earendil-works/pi): a single live
+Streamlined tool rendering for [Pi](https://github.com/earendil-works/pi): a single live
 status line while work runs, and one line per tool call in the transcript.
 
 ```
@@ -26,15 +26,15 @@ supplied by Pi.
 From GitHub:
 
 ```bash
-pi install git:github.com/fallanic/pi-opencode-ui
+pi install git:github.com/fallanic/pi-streamline
 ```
 
 For development, install this folder instead — Pi loads the files directly, so edits show up
 on the next run:
 
 ```bash
-git clone https://github.com/fallanic/pi-opencode-ui.git
-cd pi-opencode-ui && npm install    # dev dependencies, for the tests only
+git clone https://github.com/fallanic/pi-streamline.git
+cd pi-streamline && npm install    # dev dependencies, for the tests only
 pi install . -l -a
 ```
 
@@ -47,7 +47,7 @@ pi -ne -e ./extensions/opencode-ui/index.ts
 ## Uninstall
 
 ```bash
-pi remove git:github.com/fallanic/pi-opencode-ui      # installed from GitHub
+pi remove git:github.com/fallanic/pi-streamline      # installed from GitHub
 pi remove ./ -l -a                                    # installed from this folder
 ```
 
