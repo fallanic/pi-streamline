@@ -20,7 +20,7 @@ export const DEFAULT_SETTINGS: Settings = {
 	subagentHint: true,
 };
 
-export const configPath = join(getAgentDir(), "opencode-ui.json");
+export const configPath = join(getAgentDir(), "streamline.json");
 
 /** Cycle order for the preview setting. */
 export const PREVIEW_CHOICES = [0, 3, 8] as const;

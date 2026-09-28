@@ -56,12 +56,12 @@ resolve from the settings file that declares them — so remove it from the proj
 `-l`, using the same argument you installed with. `-a` is needed until the project is trusted.
 
 `pi list` shows what is installed. Nothing else to undo: the only file the extension writes is
-`~/.pi/agent/opencode-ui.json`, and deleting it restores the defaults.
+`~/.pi/agent/streamline.json`, and deleting it restores the defaults.
 
 ## Settings
 
 `/opencode-ui` opens a menu that applies immediately and persists to
-`~/.pi/agent/opencode-ui.json`:
+`~/.pi/agent/streamline.json`:
 
 | Setting | Default | Effect |
 | --- | --- | --- |
