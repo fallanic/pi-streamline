@@ -128,8 +128,9 @@ describe("expanding a row", () => {
 		click(tui, HEIGHT - 1);
 		assert.equal(tool.expanded, true);
 		layout();
-		// Expanded, the compact row is replaced by the body: the band's first line.
-		assert.ok(tui.currentLayout.lines[1]?.includes("line 1"), "the body starts at the second line");
+		// Expanded, the band's first line is the compact row, the body follows it.
+		assert.ok(tui.currentLayout.lines[1]?.includes("Read"), "the call row stays on top");
+		assert.ok(tui.currentLayout.lines[2]?.includes("line 1"), "the body starts after the row");
 
 		click(tui, 1);
 		assert.equal(tool.expanded, false);

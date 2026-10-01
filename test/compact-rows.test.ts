@@ -218,7 +218,11 @@ describe("compact tool rows", () => {
 		assert.equal(component.expanded, false);
 		assert.ok(click(1)?.handled, "the row handles the click");
 		assert.equal(component.expanded, true);
-		assert.match(component.render(60)[1].replace(/\[[0-9;]*m/g, ""), /BODY-LINE-1/);
+		assert.match(component.render(60)[2].replace(/\x1b\[[0-9;]*m/g, ""), /BODY-LINE-1/);
+		assert.ok(
+			component.render(60)[1].replace(/\x1b\[[0-9;]*m/g, "").includes("Read"),
+			"the expanded block keeps the call row on top",
+		);
 	});
 
 	it("hands Pi's renderer back its own component, not our wrapper", (t) => {

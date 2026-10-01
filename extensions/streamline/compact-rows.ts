@@ -217,6 +217,19 @@ export function installCompactRows(
 					const band = new Box(0, 0, (text) =>
 						theme.bg(isError ? "toolErrorBg" : "toolSuccessBg", text),
 					);
+					// Keep the call itself visible at the top of the expanded block, so a
+					// long output can be read without scrolling back up to find out
+					// which tool produced it.
+					band.addChild(
+						row(
+							theme,
+							isError ? ICON_ERROR : ICON_OK,
+							isError ? "error" : "success",
+							this.toolName,
+							toolDetail(this.toolName, this.args),
+							metrics(result, log, context),
+						),
+					);
 					band.addChild(inner);
 					// Add collapse hint below the expanded content
 					const collapseHint = new Text(theme.fg("dim", `   Click to collapse`), 0, 0);
