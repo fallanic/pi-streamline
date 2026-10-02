@@ -135,6 +135,45 @@ describe("compact tool rows", () => {
 		assert.ok(running[0].startsWith("◐  Bash  npm test"), running[0]);
 	});
 
+	it("keeps one row while the result streams in", (t) => {
+		install(t);
+		const component = new ToolExecutionComponent(
+			"bash",
+			"call-partial",
+			{ command: "npm test" },
+			{},
+			{ renderCall: () => new Text("CALL", 0, 0), renderResult: () => new Text(BODY, 0, 0) },
+			fakeUi,
+			CWD,
+		);
+		component.markExecutionStarted();
+		component.setArgsComplete();
+		// Pi streams results via `updateResult(result, true)` (tool_execution_update):
+		// the call is still running, so only the running row may be drawn.
+		component.updateResult({ content: [{ type: "text", text: "BODY-LINE-1" }], isError: false }, true);
+		const streaming = component
+			.render(60)
+			.map((line) => line.replace(/\u001b\[[0-9;]*m/g, "").trim())
+			.filter(Boolean);
+		assert.equal(streaming.length, 1, `expected one row while streaming, got ${JSON.stringify(streaming)}`);
+		assert.ok(streaming[0].startsWith("◐  Bash  npm test"), streaming[0]);
+		component.updateResult({ content: [{ type: "text", text: BODY }], isError: false }, false);
+		const settled = component
+			.render(60)
+			.map((line) => line.replace(/\u001b\[[0-9;]*m/g, "").trim())
+			.filter(Boolean);
+		assert.ok(settled[0].startsWith("✓  Bash  npm test"), settled[0]);
+	});
+
+	it("spreads a multi-line command over as many rows as it takes", (t) => {
+		install(t);
+		const lines = textLines("bash", { command: "npm test\n  --watch\n# tail" });
+		assert.ok(lines[0].startsWith("✓  Bash  npm test"), lines[0]);
+		assert.equal(lines[1], "--watch", "indentation stripped, rest of the command kept");
+		assert.equal(lines[2], "# tail");
+		assert.ok(lines[3].includes("Click to expand"), `expected expand hint in ${lines[3]}`);
+	});
+
 	it("marks a failed call", (t) => {
 		install(t);
 		const component = new ToolExecutionComponent(

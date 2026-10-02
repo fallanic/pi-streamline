@@ -61,14 +61,22 @@ const ARG_KEYS: Record<string, readonly string[]> = {
 
 export const COMPACT_TOOLS: ReadonlySet<string> = new Set(Object.keys(ARG_KEYS));
 
-/** The tool's identifying argument, falling back to the generic heuristic. */
-export function toolDetail(toolName: string, args: unknown): string {
+/**
+ * The tool's identifying argument, one line per line of the real value.
+ *
+ * Transcript rows keep it verbatim — no whitespace collapsing, no truncation — so a
+ * long `bash` command reads as itself. Only trailing blank space goes; leading
+ * indentation is part of the command. Falls back to `summarize`, which is
+ * truncated and single-line, for tools with no identifying argument.
+ */
+export function toolDetailLines(toolName: string, args: unknown): string[] {
 	const keys = ARG_KEYS[toolName];
 	if (keys && args !== null && typeof args === "object") {
 		for (const key of keys) {
 			const value = (args as Record<string, unknown>)[key];
-			if (typeof value === "string" && value.trim()) return truncate(compact(value));
+			if (typeof value === "string" && value.trim()) return value.trimEnd().split("\n");
 		}
 	}
-	return summarize(toolName, args);
+	const fallback = summarize(toolName, args);
+	return fallback ? [fallback] : [];
 }

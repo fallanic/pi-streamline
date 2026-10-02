@@ -3,7 +3,7 @@ import type { Component, Theme } from "@earendil-works/pi-tui";
 import { Box, MouseRegion, Text } from "@earendil-works/pi-tui";
 import { type AnyMethod, patchMethod } from "./patch.ts";
 import type { StatusLine } from "./status-line.ts";
-import { COMPACT_TOOLS, toolDetail, toolLabel } from "./summarize.ts";
+import { COMPACT_TOOLS, toolDetailLines, toolLabel } from "./summarize.ts";
 
 const CALL_RENDERER = "getCallRenderer";
 const RESULT_RENDERER = "getResultRenderer";
@@ -97,21 +97,28 @@ function metrics(result: AgentToolResult, log: StatusLine, context?: RenderConte
 	return parts.join(" · ");
 }
 
-/** `✓ Read  src/parser.ts  42 lines · 120ms`, optionally with a peek at the output. */
+/**
+ * `✓ Read  src/parser.ts  42 lines · 120ms`, optionally with a peek at the output.
+ *
+ * `detail` is the tool's identifying argument, already split into its own lines: the
+ * first one shares the icon line, the rest follow indented under it, so a long
+ * multi-line command is shown whole rather than collapsed into one truncated line.
+ */
 function row(
 	theme: Theme,
 	icon: string,
 	iconColor: "accent" | "success" | "error",
 	toolName: string,
-	detail: string,
+	detail: string[],
 	metricsText: string,
 	preview: string[] = [],
 	hint?: string,
 ): Component {
 	const parts = [theme.fg("toolTitle", theme.bold(toolLabel(toolName)))];
-	if (detail) parts.push(theme.fg("text", detail));
+	if (detail[0]) parts.push(theme.fg("text", detail[0]));
 	if (metricsText) parts.push(theme.fg("muted", metricsText));
 	const lines = [`${theme.fg(iconColor, icon)}  ${parts.join("  ")}`];
+	for (const line of detail.slice(1)) lines.push(theme.fg("text", `   ${line}`));
 	for (const line of preview) lines.push(theme.fg("dim", `   ${line}`));
 	if (hint) lines.push(theme.fg("dim", `   ${hint}`));
 	return new Text(lines.join("\n"), 0, 0);
@@ -188,7 +195,14 @@ export function installCompactRows(
 				// Once the result has landed, the result renderer draws the settled row,
 				// so the call renderer must not draw a second line.
 				if (context?.isPartial !== false) {
-					return row(theme, ICON_RUNNING, "accent", this.toolName, toolDetail(this.toolName, args), "");
+					return row(
+						theme,
+						ICON_RUNNING,
+						"accent",
+						this.toolName,
+						toolDetailLines(this.toolName, args),
+						"",
+					);
 				}
 				return BLANK;
 			};
@@ -206,6 +220,12 @@ export function installCompactRows(
 			// plain text dump. Track their component and pass that instead.
 			let inner: Component | undefined;
 			return (result, options, theme, context) => {
+				// `updateResult(result, /* isPartial */ true)` fires on every streaming
+				// `tool_execution_update`, so a result can arrive while the call is still
+				// running — with `isPartial` still true. Drawing the settled row then would
+				// put `✓` under the `◐` the call renderer draws, i.e. the same call twice.
+				// The call row owns every not-yet-settled state.
+				if (context?.isPartial !== false) return BLANK;
 				const isError = context?.isError === true;
 				// Expanded: Pi's own renderer, full output, on the background band Pi
 				// paints by default, so an open row is visible as a block.
@@ -226,7 +246,7 @@ export function installCompactRows(
 							isError ? ICON_ERROR : ICON_OK,
 							isError ? "error" : "success",
 							this.toolName,
-							toolDetail(this.toolName, this.args),
+							toolDetailLines(this.toolName, this.args),
 							metrics(result, log, context),
 						),
 					);
@@ -245,7 +265,7 @@ export function installCompactRows(
 						isError ? ICON_ERROR : ICON_OK,
 						isError ? "error" : "success",
 						this.toolName,
-						toolDetail(this.toolName, this.args),
+						toolDetailLines(this.toolName, this.args),
 						metrics(result, log, context),
 						previewLines(result, rowOptions().outputPreviewLines),
 						"Click to expand",

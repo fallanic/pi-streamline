@@ -10,7 +10,8 @@ status line while work runs, and one line per tool call in the transcript.
 ```
 
 Nothing is hidden permanently — press Pi's expand key (`ctrl+o`) or click a row for the full
-output, exactly as Pi renders it today. An expanded row gets Pi's own tool background so it reads
+output, exactly as Pi renders it today. The tool's own arguments are never truncated: a long
+multi-line `bash` command spreads over as many rows as it needs. An expanded row gets Pi's own tool background so it reads
 as an open block, and clicking a row low in the viewport scrolls it to the top, since the
 transcript is bottom-anchored. Clicking needs Pi's fullscreen TUI mode (`/config` → TUI mode →
 `fullscreen`); Pi's regular mode never asks the terminal for mouse input. Tool execution, results,
@@ -99,6 +100,27 @@ anywhere.
 
 ```bash
 npm test        # node --test, no build step
+```
+
+### Trying a branch
+
+Pi installs an extension from a path, so a branch is tested by pointing it at a checkout of that
+branch — nothing to un-install, nothing to reconfigure:
+
+```bash
+git clone https://github.com/fallanic/pi-streamline.git /tmp/streamline-test
+git -C /tmp/streamline-test checkout <branch>
+pi install /tmp/streamline-test -l -a
+```
+
+Launch Pi, then `pi install` a second time on your normal install to switch back. To unload the
+test copy entirely: `pi remove /tmp/streamline-test -l -a`.
+
+For a single run without installing anything:
+
+```bash
+git -C /tmp/streamline-test checkout <branch> && npm --prefix /tmp/streamline-test install
+pi -ne -e /tmp/streamline-test/extensions/streamline/index.ts
 ```
 
 `/reload` picks up changes to the status line, settings, and row rendering. **Restart Pi after
