@@ -1,8 +1,13 @@
-# pi-opencode-ui — plan
+# pi-streamline — plan
+
+> Written before the `opencode-ui` → `streamline` rename. The goal and design below are
+> current; the file paths, `opencode-ui.json`, and `/opencode-ui` names are kept as first
+> written. The real layout is `extensions/streamline/` + `test/`, the settings file is
+> `streamline.json`, and the command is `/streamline`.
 
 Goal: make Pi's TUI behave like opencode's — while tools/subagents run, show a **single live status line**, and in the transcript show **one compact row per tool call**, with full output only on expand. No wall of text.
 
-Repo layout (future): `extensions/opencode-ui/index.ts` + a few sibling modules, `package.json` with `pi.extensions`.
+Repo layout: `extensions/streamline/index.ts` + a few sibling modules, `package.json` with `pi.extensions`.
 
 Decisions already made: **no zentui** (confirmed not installed in this environment), **detect-and-no-op on any patch seam that is missing**, **subagent rows are configured, not reimplemented**.
 
