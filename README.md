@@ -68,7 +68,7 @@ resolve from the settings file that declares them — so remove it from the proj
 
 ## Settings
 
-`/opencode-ui` opens a menu that applies immediately and persists to
+`/streamline` opens a menu that applies immediately and persists to
 `~/.pi/agent/streamline.json`:
 
 | Setting | Default | Effect |

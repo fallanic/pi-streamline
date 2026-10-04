@@ -36,7 +36,7 @@ export async function openSettings(
 ): Promise<void> {
 	for (;;) {
 		const entries = menuEntries(settings);
-		const choice = await ctx.ui.select("opencode-ui", entries);
+		const choice = await ctx.ui.select("streamline", entries);
 		if (!choice) return; // cancelled
 		const picked = entries.indexOf(choice);
 		if (picked < 0 || picked === entries.length - 1) return; // unknown or Done
