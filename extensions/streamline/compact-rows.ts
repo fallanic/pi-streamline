@@ -32,11 +32,12 @@ type ToolExecution = {
 
 type MouseEvent = { type: string; button: string; screenY: number };
 
-/** The two ScrollView fields the scroll below depends on. */
+/** The ScrollView fields the scroll below depends on; the last one is public API. */
 type ScrollTarget = {
 	currentScrollTop: number;
 	currentViewportHeight: number;
 	followingEnd: boolean;
+	scrollTo?(scrollTop: number, options?: { disableFollow?: boolean }): void;
 };
 
 type RenderContext = { isError?: boolean; toolCallId?: string; isPartial?: boolean; lastComponent?: Component };
@@ -171,6 +172,26 @@ function revealRow(scroll: ScrollTarget, target: number): void {
 }
 
 /**
+ * Keeps the viewport where it is across the frame that expands a row.
+ *
+ * `updateLayout` re-anchors to the end whenever the view is following it, so a row
+ * expanded from the keyboard — where nothing calls `revealRow` — slides its own
+ * beginning off the top of the viewport and leaves only the tail of the output on
+ * screen. Releasing the anchor first keeps the row on the line it was on and lets
+ * the block grow downward, which is what a mouse click already produces.
+ *
+ * `disableFollow` is what survives the layout, and no scroll position is written:
+ * the row stays on the line it was expanded from and the block grows downward.
+ * A transcript with nothing to scroll is unaffected — its position is 0 either way.
+ * Expanding does stop auto-following until the view is scrolled back to the end,
+ * which is what the click path has always done too.
+ */
+function pinRow(scroll: ScrollTarget | undefined): void {
+	if (typeof scroll?.scrollTo !== "function") return;
+	scroll.scrollTo(scroll.currentScrollTop, { disableFollow: true });
+}
+
+/**
  * Replaces Pi's per-tool renderers with a single line.
  *
  * Only the tools in `COMPACT_TOOLS` are touched. Everything else — `subagent`
@@ -275,12 +296,26 @@ export function installCompactRows(
 		},
 	);
 
-	if (!uninstallCall || !uninstallResult) {
+	// Pi's own expand key reaches every row through `setExpanded` and never scrolls,
+	// so the keyboard path needs the anchor released too — see `pinRow`.
+	const uninstallExpand = patchMethod(target, "setExpanded", (original: AnyMethod) =>
+		function (this: ToolExecution, expanded: boolean): unknown {
+			const result = original.call(this, expanded);
+			if (expanded && COMPACT_TOOLS.has(this.toolName)) {
+				pinRow(this.ui?.getPrimaryScrollView?.());
+			}
+			return result;
+		},
+	);
+
+	if (!uninstallCall || !uninstallResult || !uninstallExpand) {
 		uninstallCall?.();
 		uninstallResult?.();
+		uninstallExpand?.();
 		return undefined;
 	}
 	return () => {
+		uninstallExpand();
 		uninstallResult();
 		uninstallCall();
 	};

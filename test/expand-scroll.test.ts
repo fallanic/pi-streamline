@@ -135,4 +135,27 @@ describe("expanding a row", () => {
 		click(tui, 1);
 		assert.equal(tool.expanded, false);
 	});
+
+	// The bug: the keyboard path never reached `revealRow`, so while the transcript
+	// followed the end, `updateLayout` re-anchored and the expanded block lost its top.
+	it("keeps the expanded row in view when expanding from the keyboard at the end", (t) => {
+		const { tool, scroll, tui, layout, rowOnScreen } = transcript(t);
+		scroll.scrollToEnd();
+		layout();
+		assert.equal(scroll.followingEnd, true, "the transcript starts out following the end");
+		const rowBefore = rowOnScreen();
+		const topBefore = scroll.scrollTop;
+
+		tool.setExpanded(true);
+		layout();
+
+		assert.ok(
+			tui.currentLayout.lines.some((line: string) =>
+				line.replace(/\[[0-9;]*m/g, "").includes("line 1"),
+			),
+			"the beginning of the expanded output is on screen",
+		);
+		assert.equal(rowOnScreen(), rowBefore, "the call row stays on the line it was expanded from");
+		assert.equal(scroll.scrollTop, topBefore, "the anchor is released, the position is not moved");
+	});
 });
