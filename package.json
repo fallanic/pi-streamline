@@ -30,7 +30,7 @@
 		"@earendil-works/pi-tui": "*"
 	},
 	"scripts": {
-		"test": "node --test test/"
+		"test": "node --test \"test/*.test.ts\""
 	},
 	"devDependencies": {
 		"@earendil-works/pi-coding-agent": "^0.87.1",
