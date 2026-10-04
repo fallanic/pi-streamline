@@ -24,6 +24,12 @@ supplied by Pi.
 
 ## Install
 
+From npm:
+
+```bash
+pi install npm:pi-streamline
+```
+
 From GitHub:
 
 ```bash
@@ -48,7 +54,8 @@ pi -ne -e ./extensions/streamline/index.ts
 ## Uninstall
 
 ```bash
-pi remove git:github.com/fallanic/pi-streamline      # installed from GitHub
+pi remove npm:pi-streamline                              # installed from npm
+pi remove git:github.com/fallanic/pi-streamline           # installed from GitHub
 pi remove ./ -l -a                                    # installed from this folder
 ```
 

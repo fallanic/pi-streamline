@@ -1,9 +1,20 @@
 {
 	"name": "pi-streamline",
-	"version": "0.0.0",
+	"version": "0.1.0",
 	"description": "Opencode-style compact tool and subagent rendering for Pi.",
 	"type": "module",
 	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/fallanic/pi-streamline.git"
+	},
+	"homepage": "https://github.com/fallanic/pi-streamline#readme",
+	"bugs": "https://github.com/fallanic/pi-streamline/issues",
+	"files": [
+		"extensions",
+		"README.md",
+		"LICENSE"
+	],
 	"keywords": [
 		"pi-package",
 		"pi-extension",
@@ -15,7 +26,8 @@
 		]
 	},
 	"peerDependencies": {
-		"@earendil-works/pi-coding-agent": ">=0.87.1"
+		"@earendil-works/pi-coding-agent": "*",
+		"@earendil-works/pi-tui": "*"
 	},
 	"scripts": {
 		"test": "node --test test/"
